@@ -22,6 +22,21 @@
             height: 100vh;
             margin: 0;
             font-family: 'Arial', sans-serif;
+            overflow: hidden;
+        }
+
+        /* Power Overlay */
+        #power-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: black;
+            z-index: 100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            cursor: pointer;
         }
 
         /* Top Screen */
@@ -37,7 +52,6 @@
             align-items: center;
             justify-content: center;
             position: relative;
-            overflow: hidden;
         }
 
         .status-bar {
@@ -51,84 +65,88 @@
             align-items: center;
             padding: 0 10px;
             box-sizing: border-box;
-            font-size: 12px;
+            font-size: 11px;
             color: #333;
             border-bottom: 1px solid #ddd;
         }
 
         .game-banner {
-            width: 120px;
-            height: 120px;
-            background: #f9f9f9;
-            border: 1px solid #ddd;
+            width: 100px;
+            height: 100px;
+            background: #fff;
+            border: 1px solid #eee;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            font-size: 40px;
         }
 
-        /* Bottom Screen (Fixed Grid) */
+        /* Bottom Screen (Square Icons) */
         .bottom-screen {
             width: 320px;
             height: 240px;
             background: var(--bottom-screen-bg);
             border: 8px solid var(--border-gray);
             border-radius: 12px;
-            padding: 10px;
+            padding: 15px;
             box-sizing: border-box;
             display: grid;
-            /* 3 rows, 5 columns - perfect for 3DS layout */
-            grid-template-columns: repeat(5, 1fr); 
-            grid-template-rows: repeat(3, 1fr);
-            grid-gap: 8px;
+            grid-template-columns: repeat(4, 1fr); /* 4 columns for better square spacing */
+            grid-gap: 12px;
+            overflow-y: auto;
         }
 
         .icon {
             background: white;
-            border-radius: 6px;
+            border-radius: 10px;
+            aspect-ratio: 1 / 1; /* Forces the icon to be a perfect square */
             display: flex;
             align-items: center;
             justify-content: center;
             cursor: pointer;
-            border: 2px solid transparent;
-            box-shadow: 0 2px 2px rgba(0,0,0,0.2);
+            border: 2px solid #bbb;
+            box-shadow: 0 3px 0 #999;
             font-size: 10px;
             font-weight: bold;
-            transition: 0.1s;
+            transition: all 0.1s;
+        }
+
+        .icon:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #999;
         }
 
         .icon:hover {
             border: 2px solid var(--accent-red);
-            transform: scale(1.05);
         }
 
         .icon.empty {
-            background: rgba(255,255,255,0.3);
+            background: rgba(255,255,255,0.2);
+            border: 2px dashed rgba(0,0,0,0.1);
             box-shadow: none;
             cursor: default;
         }
 
-        h1.logo {
-            color: white;
-            font-size: 20px;
-            margin: 0 0 10px 0;
-        }
+        h1.logo { color: white; font-size: 20px; margin-bottom: 10px; }
         h1.logo span { color: var(--accent-red); }
     </style>
 </head>
 <body>
 
+    <div id="power-overlay" onclick="startConsole()">
+        <div style="font-size: 50px;">🔴</div>
+        <p>Click to Power On</p>
+    </div>
+
     <h1 class="logo">3D<span>Site</span></h1>
 
     <div class="top-screen">
         <div class="status-bar">
-            <span>📶 Internet</span>
-            <span id="clock">00:00:00 AM</span>
+            <span>📶 3DSite_Net</span>
+            <span id="clock">00:00 AM</span>
         </div>
-        <div class="game-banner" id="banner">
-            <img id="banner-img" src="" style="display:none; width:100%; height:100%;">
-            <span id="banner-text">Select Game</span>
-        </div>
+        <div class="game-banner" id="banner">🏠</div>
         <p id="game-title" style="margin-top: 10px; font-weight: bold; color: #333;">Home Menu</p>
     </div>
 
@@ -138,12 +156,8 @@
         <div class="icon" onclick="selectGame('Zelda', '🛡️')">ZLD</div>
         <div class="icon" onclick="selectGame('Settings', '🔧')">SET</div>
         <div class="icon" onclick="selectGame('Browser', '🌐')">WWW</div>
-        
-        <div class="icon empty"></div>
-        <div class="icon empty"></div>
-        <div class="icon empty"></div>
-        <div class="icon empty"></div>
-        <div class="icon empty"></div>
+        <div class="icon" onclick="selectGame('Camera', '📸')">CAM</div>
+        <div class="icon" onclick="selectGame('Friends', '👥')">FRD</div>
         <div class="icon empty"></div>
         <div class="icon empty"></div>
         <div class="icon empty"></div>
@@ -151,33 +165,34 @@
         <div class="icon empty"></div>
     </div>
 
+    <audio id="bgm" loop>
+        <source src="https://vgmtreasurechest.com/soundtracks/nintendo-3ds-background-music/ojgeaqbl/02.%20Home%20Menu.mp3" type="audio/mpeg">
+    </audio>
+
     <script>
-        // Real-Time Clock Function
+        function startConsole() {
+            document.getElementById('power-overlay').style.display = 'none';
+            const audio = document.getElementById('bgm');
+            audio.volume = 0.5;
+            audio.play();
+        }
+
         function updateClock() {
             const now = new Date();
             let hours = now.getHours();
             let minutes = now.getMinutes();
-            let seconds = now.getSeconds();
             let ampm = hours >= 12 ? 'PM' : 'AM';
-            
-            hours = hours % 12;
-            hours = hours ? hours : 12; // the hour '0' should be '12'
+            hours = hours % 12 || 12;
             minutes = minutes < 10 ? '0'+minutes : minutes;
-            seconds = seconds < 10 ? '0'+seconds : seconds;
-            
-            const strTime = hours + ':' + minutes + ':' + seconds + ' ' + ampm;
-            document.getElementById('clock').textContent = strTime;
+            document.getElementById('clock').textContent = hours + ':' + minutes + ' ' + ampm;
         }
 
-        // Run clock every second
         setInterval(updateClock, 1000);
-        updateClock(); // Initialize immediately
+        updateClock();
 
-        // Game Selection Logic
         function selectGame(name, icon) {
             document.getElementById('game-title').innerText = name;
-            document.getElementById('banner-text').innerText = icon;
-            document.getElementById('banner-text').style.fontSize = "50px";
+            document.getElementById('banner').innerText = icon;
         }
     </script>
 
