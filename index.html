@@ -1,0 +1,156 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3DSite - Home Menu</title>
+    <style>
+        :root {
+            --bg-color: #f0f0f0;
+            --top-screen-bg: #ffffff;
+            --bottom-screen-bg: #e0e0e0;
+            --accent-red: #e60012;
+            --border-gray: #333;
+        }
+
+        body {
+            background-color: #222;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        /* Top Screen (Banner/Info) */
+        .top-screen {
+            width: 400px;
+            height: 240px;
+            background: var(--top-screen-bg);
+            border: 8px solid var(--border-gray);
+            border-radius: 10px;
+            margin-bottom: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+            position: relative;
+        }
+
+        .status-bar {
+            position: absolute;
+            top: 5px;
+            width: 90%;
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: #555;
+        }
+
+        .game-banner {
+            width: 150px;
+            height: 150px;
+            background: #eee;
+            border: 2px solid #ccc;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            color: #999;
+        }
+
+        /* Bottom Screen (Game Grid) */
+        .bottom-screen {
+            width: 320px;
+            height: 240px;
+            background: var(--bottom-screen-bg);
+            border: 8px solid var(--border-gray);
+            border-radius: 10px;
+            padding: 10px;
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            grid-gap: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+
+        .icon {
+            background: white;
+            border-radius: 8px;
+            aspect-ratio: 1/1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: transform 0.1s, border 0.1s;
+            border: 2px solid transparent;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+
+        .icon:hover {
+            transform: scale(1.05);
+            border: 2px solid var(--accent-red);
+        }
+
+        .icon-text {
+            font-size: 10px;
+            text-align: center;
+            font-weight: bold;
+        }
+
+        h1.logo {
+            color: white;
+            font-size: 24px;
+            margin-bottom: 10px;
+        }
+
+        .logo span { color: var(--accent-red); }
+    </style>
+</head>
+<body>
+
+    <h1 class="logo">3D<span>Site</span></h1>
+
+    <div class="top-screen">
+        <div class="status-bar">
+            <span>Internet: Connected</span>
+            <span>12:00 PM</span>
+        </div>
+        <div class="game-banner" id="banner">Select a Game</div>
+        <p id="game-title" style="margin-top: 10px; font-weight: bold;">Menu</p>
+    </div>
+
+    <div class="bottom-screen">
+        <div class="icon" onclick="selectGame('Mario Kart')">
+            <div class="icon-text">MK7</div>
+        </div>
+        <div class="icon" onclick="selectGame('Pokemon')">
+            <div class="icon-text">PKMN</div>
+        </div>
+        <div class="icon" onclick="selectGame('Zelda')">
+            <div class="icon-text">ZELDA</div>
+        </div>
+        <div class="icon" onclick="selectGame('Animal Crossing')">
+            <div class="icon-text">ACNL</div>
+        </div>
+        <div class="icon" onclick="selectGame('Settings')">
+            <div class="icon-text">🔧</div>
+        </div>
+        <div class="icon" onclick="selectGame('Browser')">
+            <div class="icon-text">🌐</div>
+        </div>
+    </div>
+
+    <script>
+        function selectGame(name) {
+            document.getElementById('game-title').innerText = name;
+            document.getElementById('banner').innerText = name + " Banner";
+            document.getElementById('banner').style.background = "#fff";
+            document.getElementById('banner').style.color = "#e60012";
+        }
+    </script>
+
+</body>
+</html>
