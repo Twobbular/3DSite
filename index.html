@@ -80,6 +80,18 @@
             justify-content: center;
             box-shadow: 0 4px 10px rgba(0,0,0,0.1);
             font-size: 40px;
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+
+        /* Opening Animation Class */
+        .launch-anim {
+            animation: pulse-spin 0.5s ease-out;
+        }
+
+        @keyframes pulse-spin {
+            0% { transform: scale(1) rotate(0deg); }
+            50% { transform: scale(1.2) rotate(10deg); }
+            100% { transform: scale(1) rotate(0deg); }
         }
 
         /* Bottom Screen Container */
@@ -227,13 +239,20 @@
         updateClock();
 
         function selectGame(name, icon) {
+            const banner = document.getElementById('banner');
+            
             // Update UI
             document.getElementById('game-title').innerText = name;
-            document.getElementById('banner').innerText = icon;
+            banner.innerText = icon;
+
+            // Trigger Animation
+            banner.classList.remove('launch-anim');
+            void banner.offsetWidth; // Trigger reflow to restart CSS animation
+            banner.classList.add('launch-anim');
 
             // Play SFX
             const sfx = document.getElementById('click-sfx');
-            sfx.currentTime = 0; // Rewind to start in case of rapid clicks
+            sfx.currentTime = 0; 
             sfx.play();
         }
     </script>
