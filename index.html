@@ -11,6 +11,8 @@
             --bottom-screen-bg: #f9d3d9; 
             --accent-red: #e60012;
             --border-gray: #333;
+            --depth-offset: 4px;
+            --depth-blur: 10px;
         }
 
         body {
@@ -39,6 +41,37 @@
             cursor: pointer;
         }
 
+        /* Console Layout */
+        .console-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            position: relative;
+        }
+
+        /* 3D Slider Section */
+        .slider-container {
+            position: absolute;
+            right: -50px;
+            top: 40px;
+            height: 160px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            color: white;
+            font-size: 10px;
+            font-weight: bold;
+        }
+
+        .slider-container input {
+            writing-mode: bt-lr; /* Bottom to top */
+            appearance: slider-vertical;
+            width: 8px;
+            height: 120px;
+            margin: 5px 0;
+            cursor: pointer;
+        }
+
         /* Top Screen */
         .top-screen {
             width: 400px;
@@ -52,6 +85,7 @@
             align-items: center;
             justify-content: center;
             position: relative;
+            perspective: 500px;
         }
 
         .status-bar {
@@ -69,6 +103,7 @@
             color: #333;
             border-bottom: 1px solid #ddd;
             text-shadow: 1px 1px 1px rgba(255,255,255,0.5);
+            z-index: 10;
         }
 
         .game-banner {
@@ -78,22 +113,22 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+            /* 3D Depth logic */
+            box-shadow: 0 var(--depth-offset) var(--depth-blur) rgba(0,0,0,0.3);
             font-size: 40px;
-            /* Smooth return to normal state */
-            transition: transform 0.2s ease;
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+            z-index: 5;
         }
 
-        /* New Bounce Animation */
+        /* Bounce Animation */
         .launch-anim {
-            animation: bounce-effect 0.4s ease-out;
+            animation: bounce-effect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
 
         @keyframes bounce-effect {
             0% { transform: scale(1) translateY(0); }
-            30% { transform: scale(1.1) translateY(-15px); }
-            50% { transform: scale(0.95) translateY(0); }
-            70% { transform: scale(1.05) translateY(-5px); }
+            30% { transform: scale(1.15) translateY(-20px); }
+            50% { transform: scale(0.9) translateY(0); }
             100% { transform: scale(1) translateY(0); }
         }
 
@@ -182,33 +217,42 @@
 
     <h1 class="logo">3D<span>Site</span></h1>
 
-    <div class="top-screen">
-        <div class="status-bar">
-            <span>🛜 Internet</span>
-            <span id="clock">00:00 AM</span>
-        </div>
-        <div class="game-banner" id="banner">🏠</div>
-        <p id="game-title" style="margin-top: 10px; font-weight: bold; color: #333;">Home Menu</p>
-    </div>
-
-    <div class="bottom-screen">
-        <div class="utility-row">
-            <div class="util-icon notes" onclick="selectGame('Game Notes', '📝')">✎</div>
-            <div class="util-icon friends" onclick="selectGame('Friend List', '😊')">😊</div>
-            <div class="util-icon notifs" onclick="selectGame('Notifications', '💬')">💬</div>
-            <div class="util-icon browser" onclick="selectGame('Internet Browser', '🌐')">🌐</div>
-            <div class="util-icon miiverse" onclick="selectGame('Miiverse', '👥')">👥</div>
+    <div class="console-container">
+        <!-- 3D Depth Slider -->
+        <div class="slider-container">
+            <span>3D</span>
+            <input type="range" id="depthSlider" min="0" max="100" value="50" oninput="updateDepth(this.value)">
+            <span>OFF</span>
         </div>
 
-        <div class="game-grid">
-            <div class="icon" onclick="selectGame('Mario Kart 7', '🏎️')">MK7</div>
-            <div class="icon" onclick="selectGame('Pokémon', '🐾')">PKMN</div>
-            <div class="icon" onclick="selectGame('Zelda', '🛡️')">ZLD</div>
-            <div class="icon" onclick="selectGame('Tomodachi Life', '🏝️')">TOM</div>
-            <div class="icon" onclick="selectGame('Settings', '🔧')">SET</div>
-            <div class="icon" onclick="selectGame('Camera', '📷')">CAM</div>
-            <div class="icon" onclick="selectGame('Download Play', '💻')">DWP</div>
-            <div class="icon" onclick="selectGame('Face Raiders', '😀')">FCR</div>
+        <div class="top-screen">
+            <div class="status-bar">
+                <span>🛜 Internet</span>
+                <span id="clock">00:00 AM</span>
+            </div>
+            <div class="game-banner" id="banner">🏠</div>
+            <p id="game-title" style="margin-top: 10px; font-weight: bold; color: #333;">Home Menu</p>
+        </div>
+
+        <div class="bottom-screen">
+            <div class="utility-row">
+                <div class="util-icon notes" onclick="selectGame('Game Notes', '📝')">✎</div>
+                <div class="util-icon friends" onclick="selectGame('Friend List', '😊')">😊</div>
+                <div class="util-icon notifs" onclick="selectGame('Notifications', '💬')">💬</div>
+                <div class="util-icon browser" onclick="selectGame('Internet Browser', '🌐')">🌐</div>
+                <div class="util-icon miiverse" onclick="selectGame('Miiverse', '👥')">👥</div>
+            </div>
+
+            <div class="game-grid">
+                <div class="icon" onclick="selectGame('Mario Kart 7', '🏎️')">MK7</div>
+                <div class="icon" onclick="selectGame('Pokémon', '🐾')">PKMN</div>
+                <div class="icon" onclick="selectGame('Zelda', '🛡️')">ZLD</div>
+                <div class="icon" onclick="selectGame('Tomodachi Life', '🏝️')">TOM</div>
+                <div class="icon" onclick="selectGame('Settings', '🔧')">SET</div>
+                <div class="icon" onclick="selectGame('Camera', '📷')">CAM</div>
+                <div class="icon" onclick="selectGame('Download Play', '💻')">DWP</div>
+                <div class="icon" onclick="selectGame('Face Raiders', '😀')">FCR</div>
+            </div>
         </div>
     </div>
 
@@ -226,6 +270,7 @@
             const audio = document.getElementById('bgm');
             audio.volume = 0.4;
             audio.play();
+            updateDepth(50); // Set initial depth
         }
 
         function updateClock() {
@@ -240,6 +285,19 @@
 
         setInterval(updateClock, 1000);
         updateClock();
+
+        function updateDepth(val) {
+            const root = document.querySelector(':root');
+            const intensity = val / 100;
+            
+            // Adjust CSS variables for depth effect
+            root.style.setProperty('--depth-offset', (intensity * 12) + 'px');
+            root.style.setProperty('--depth-blur', (intensity * 20) + 'px');
+            
+            // Apply a slight tilt/perspective based on depth
+            const banner = document.getElementById('banner');
+            banner.style.transform = `translateZ(${intensity * 30}px)`;
+        }
 
         function selectGame(name, icon) {
             const banner = document.getElementById('banner');
