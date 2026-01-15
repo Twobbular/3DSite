@@ -120,7 +120,6 @@
             border-radius: 10px;
         }
 
-        /* Bounce Animation */
         .launch-anim {
             animation: bounce-effect 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
@@ -139,91 +138,104 @@
             background: var(--bottom-screen-bg);
             border: 8px solid var(--border-gray);
             border-radius: 12px;
-            padding: 10px;
+            padding: 8px;
             box-sizing: border-box;
             display: flex;
             flex-direction: column;
+            position: relative;
         }
 
         .utility-row {
             display: flex;
             justify-content: space-around;
-            padding-bottom: 10px;
+            padding-bottom: 5px;
             border-bottom: 2px solid rgba(255,255,255,0.5);
-            margin-bottom: 10px;
+            margin-bottom: 8px;
         }
 
         .util-icon {
-            width: 35px;
-            height: 35px;
+            width: 32px;
+            height: 32px;
             background: white;
-            border-radius: 8px;
+            border-radius: 6px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 16px;
             cursor: pointer;
             box-shadow: 0 2px 0 #ccc;
-            transition: 0.05s;
             border: 2px solid transparent;
         }
 
         .util-icon:active { transform: translateY(2px); box-shadow: 0 0 0 #ccc; }
         .util-icon:hover { border: 2px solid var(--accent-red); }
 
-        .notes { color: #d4af37; }
-        .friends { color: #ff8c00; }
-        .notifs { color: #2ecc71; }
-        .browser { color: #3498db; }
-        .miiverse { color: #27ae60; }
-
-        /* Main Game Grid */
-        .game-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            grid-gap: 8px;
+        /* Scrollable Game Area */
+        .scroll-container {
             flex-grow: 1;
-            overflow-y: auto;
-            padding: 5px;
+            overflow-x: auto;
+            overflow-y: hidden;
+            white-space: nowrap;
+            padding-bottom: 40px; /* Space for Start button */
+            scrollbar-width: none; /* Hide scrollbar Firefox */
+        }
+        .scroll-container::-webkit-scrollbar { display: none; }
+
+        .game-grid {
+            display: inline-grid;
+            grid-template-rows: repeat(2, 1fr);
+            grid-auto-flow: column;
+            grid-gap: 8px;
+            height: 100%;
         }
 
         .icon {
             background: white;
-            border-radius: 12px;
-            aspect-ratio: 1 / 1;
+            border-radius: 10px;
+            width: 65px;
+            height: 65px;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             cursor: pointer;
             border: 2px solid #ddd;
-            box-shadow: 0 4px 0 rgba(0,0,0,0.1);
-            font-size: 24px;
-            font-weight: bold;
-            transition: transform 0.1s ease, box-shadow 0.1s ease;
-            position: relative;
-            overflow: hidden;
+            box-shadow: 0 3px 0 rgba(0,0,0,0.1);
+            font-size: 20px;
+            transition: transform 0.1s;
         }
 
         .icon span {
-            font-size: 8px;
-            margin-top: 4px;
+            font-size: 7px;
+            margin-top: 2px;
             color: rgba(0,0,0,0.6);
-            text-transform: uppercase;
+            font-weight: bold;
         }
 
-        .icon:hover { 
-            transform: scale(1.05);
-            border-color: var(--accent-red);
-            z-index: 2;
-        }
+        .icon:hover { border-color: var(--accent-red); transform: scale(1.05); }
 
-        .icon:active { 
-            transform: scale(0.95) translateY(2px); 
-            box-shadow: 0 1px 0 rgba(0,0,0,0.1);
+        /* Start Button */
+        #start-btn {
+            position: absolute;
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 140px;
+            height: 32px;
+            background: #fff;
+            border: 2px solid #aaa;
+            border-radius: 20px;
+            font-weight: bold;
+            color: #333;
+            display: none; /* Hidden until game selected */
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
         }
+        #start-btn:active { background: #eee; transform: translateX(-50%) translateY(1px); }
 
-        /* App Specific Colors */
+        /* Colors */
         .app-mk7 { background: linear-gradient(135deg, #ff4d4d, #b30000); color: white; }
         .app-pkmn { background: linear-gradient(135deg, #ffd700, #ff8c00); color: white; }
         .app-zld { background: linear-gradient(135deg, #4caf50, #1b5e20); color: white; }
@@ -247,7 +259,6 @@
     <h1 class="logo">3D<span>Site</span></h1>
 
     <div class="console-container">
-        <!-- 3D Depth Slider -->
         <div class="slider-container">
             <span>3D</span>
             <input type="range" id="depthSlider" min="0" max="100" value="50" oninput="updateDepth(this.value)">
@@ -265,23 +276,27 @@
 
         <div class="bottom-screen">
             <div class="utility-row">
-                <div class="util-icon notes" onclick="selectGame('Game Notes', '📝')">✎</div>
-                <div class="util-icon friends" onclick="selectGame('Friend List', '😊')">😊</div>
-                <div class="util-icon notifs" onclick="selectGame('Notifications', '💬')">💬</div>
-                <div class="util-icon browser" onclick="selectGame('Internet Browser', '🌐')">🌐</div>
-                <div class="util-icon miiverse" onclick="selectGame('Miiverse', '👥')">👥</div>
+                <div class="util-icon" style="color:#d4af37" onclick="selectGame('Game Notes', '📝')">✎</div>
+                <div class="util-icon" style="color:#ff8c00" onclick="selectGame('Friend List', '😊')">😊</div>
+                <div class="util-icon" style="color:#2ecc71" onclick="selectGame('Notifications', '💬')">💬</div>
+                <div class="util-icon" style="color:#3498db" onclick="selectGame('Internet Browser', '🌐')">🌐</div>
+                <div class="util-icon" style="color:#27ae60" onclick="selectGame('Miiverse', '👥')">👥</div>
             </div>
 
-            <div class="game-grid">
-                <div class="icon app-mk7" onclick="selectGame('Mario Kart 7', '🏎️')">🏎️<span>MK7</span></div>
-                <div class="icon app-pkmn" onclick="selectGame('Pokémon', '🐾')">🐾<span>PKMN</span></div>
-                <div class="icon app-zld" onclick="selectGame('Zelda', '🛡️')">🛡️<span>ZLD</span></div>
-                <div class="icon app-tom" onclick="selectGame('Tomodachi Life', '🏝️')">🏝️<span>TOM</span></div>
-                <div class="icon app-set" onclick="selectGame('Settings', '🔧')">🔧<span>SET</span></div>
-                <div class="icon app-cam" onclick="selectGame('Camera', '📷')">📷<span>CAM</span></div>
-                <div class="icon app-dwp" onclick="selectGame('Download Play', '💻')">💻<span>DWP</span></div>
-                <div class="icon app-fcr" onclick="selectGame('Face Raiders', '😀')">😀<span>FCR</span></div>
+            <div class="scroll-container">
+                <div class="game-grid">
+                    <div class="icon app-mk7" onclick="selectGame('Mario Kart 7', '🏎️')">🏎️<span>MK7</span></div>
+                    <div class="icon app-pkmn" onclick="selectGame('Pokémon', '🐾')">🐾<span>PKMN</span></div>
+                    <div class="icon app-zld" onclick="selectGame('Zelda', '🛡️')">🛡️<span>ZLD</span></div>
+                    <div class="icon app-tom" onclick="selectGame('Tomodachi Life', '🏝️')">🏝️<span>TOM</span></div>
+                    <div class="icon app-set" onclick="selectGame('Settings', '🔧')">🔧<span>SET</span></div>
+                    <div class="icon app-cam" onclick="selectGame('Camera', '📷')">📷<span>CAM</span></div>
+                    <div class="icon app-dwp" onclick="selectGame('Download Play', '💻')">💻<span>DWP</span></div>
+                    <div class="icon app-fcr" onclick="selectGame('Face Raiders', '😀')">😀<span>FCR</span></div>
+                </div>
             </div>
+
+            <div id="start-btn" onclick="launchGame()">Start</div>
         </div>
     </div>
 
@@ -294,6 +309,8 @@
     </audio>
 
     <script>
+        let currentGame = "";
+
         function startConsole() {
             document.getElementById('power-overlay').style.display = 'none';
             const audio = document.getElementById('bgm');
@@ -311,26 +328,24 @@
             minutes = minutes < 10 ? '0'+minutes : minutes;
             document.getElementById('clock').textContent = hours + ':' + minutes + ' ' + ampm;
         }
-
         setInterval(updateClock, 1000);
         updateClock();
 
         function updateDepth(val) {
-            const root = document.querySelector(':root');
             const intensity = val / 100;
-            
-            root.style.setProperty('--depth-offset', (intensity * 12) + 'px');
-            root.style.setProperty('--depth-blur', (intensity * 20) + 'px');
-            
-            const banner = document.getElementById('banner');
-            banner.style.transform = `translateZ(${intensity * 30}px)`;
+            document.querySelector(':root').style.setProperty('--depth-offset', (intensity * 12) + 'px');
+            document.querySelector(':root').style.setProperty('--depth-blur', (intensity * 20) + 'px');
+            document.getElementById('banner').style.transform = `translateZ(${intensity * 30}px)`;
         }
 
         function selectGame(name, icon) {
+            currentGame = name;
             const banner = document.getElementById('banner');
-            
             document.getElementById('game-title').innerText = name;
             banner.innerText = icon;
+
+            // Show Start Button
+            document.getElementById('start-btn').style.display = 'flex';
 
             banner.classList.remove('launch-anim');
             void banner.offsetWidth; 
@@ -339,6 +354,13 @@
             const sfx = document.getElementById('click-sfx');
             sfx.currentTime = 0; 
             sfx.play();
+        }
+
+        function launchGame() {
+            if (!currentGame) return;
+            // Format name for URL (lowercase and no spaces)
+            const slug = currentGame.toLowerCase().replace(/\s+/g, '');
+            window.location.href = `https://twobbular.github.io/3dsite/${slug}`;
         }
     </script>
 </body>
