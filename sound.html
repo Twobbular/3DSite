@@ -1,0 +1,519 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3DSOS - Nintendo 3DS Sound</title>
+    <style>
+        :root {
+            --top-bg: #e0e0e0;
+            --bottom-bg: #f5f5f5;
+            --nintendo-blue: #0066cc;
+            --status-bar-bg: #4a3328;
+            --text-color: #ffffff;
+        }
+
+        body {
+            background-color: #1a1a1a;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            font-family: 'Arial', sans-serif;
+            overflow: hidden;
+            color: #333;
+        }
+
+        .console-container {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Top Screen */
+        .top-screen {
+            width: 400px;
+            height: 240px;
+            background: #fff;
+            border: 8px solid #333;
+            border-radius: 12px;
+            margin-bottom: 15px;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .top-header {
+            background: var(--nintendo-blue);
+            color: white;
+            text-align: center;
+            padding: 4px 0;
+            font-size: 14px;
+            font-weight: bold;
+        }
+
+        .visualizer-area {
+            flex-grow: 1;
+            background: linear-gradient(to bottom, #d0d0d0, #ffffff);
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            background-image: 
+                linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee),
+                linear-gradient(45deg, #eee 25%, transparent 25%, transparent 75%, #eee 75%, #eee);
+            background-size: 40px 40px;
+            background-position: 0 0, 20px 20px;
+        }
+
+        canvas#visualizer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        .bird-container {
+            position: absolute;
+            bottom: 10px;
+            left: 20px;
+            display: flex;
+            gap: 10px;
+            z-index: 2;
+        }
+
+        .bird { font-size: 24px; }
+
+        .top-status-bar {
+            background: var(--status-bar-bg);
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            color: white;
+            font-size: 12px;
+            justify-content: space-between;
+        }
+
+        /* Bottom Screen */
+        .bottom-screen {
+            width: 320px;
+            height: 240px;
+            background: #ececec;
+            border: 8px solid #333;
+            border-radius: 12px;
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+        }
+
+        .record-area {
+            background: #d8d0c0;
+            height: 140px;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .record-disc {
+            width: 220px;
+            height: 220px;
+            background: #111;
+            border-radius: 50%;
+            position: absolute;
+            bottom: -80px;
+            background: radial-gradient(circle, #333 10%, #111 11%, #111 100%);
+            box-shadow: 0 0 10px rgba(0,0,0,0.5);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .record-disc::after {
+            content: '';
+            width: 90%;
+            height: 90%;
+            border-radius: 50%;
+            border: 1px solid #222;
+        }
+
+        .spinning {
+            animation: rotate 3s linear infinite;
+        }
+
+        @keyframes rotate {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+
+        .drag-zone {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            right: 10px;
+            bottom: 60px;
+            border: 2px dashed #999;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            color: #666;
+            font-size: 12px;
+            background: rgba(255,255,255,0.7);
+            z-index: 10;
+            transition: background 0.2s;
+            cursor: pointer;
+        }
+
+        .drag-zone:hover {
+            background: rgba(255,255,255,0.9);
+        }
+
+        .player-controls {
+            flex-grow: 1;
+            background: #f0f0f0;
+            display: flex;
+            flex-direction: column;
+            padding: 5px;
+        }
+
+        .track-info {
+            background: var(--nintendo-blue);
+            color: white;
+            padding: 4px 10px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+
+        .seek-bar-container {
+            display: flex;
+            align-items: center;
+            padding: 5px 10px;
+            gap: 10px;
+        }
+
+        input[type="range"] {
+            flex-grow: 1;
+            cursor: pointer;
+        }
+
+        .button-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr 1fr;
+            gap: 5px;
+            padding: 5px;
+        }
+
+        .btn {
+            background: linear-gradient(to bottom, #fff, #ddd);
+            border: 1px solid #bbb;
+            border-radius: 6px;
+            padding: 8px;
+            text-align: center;
+            font-size: 11px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 0 #999;
+            user-select: none;
+        }
+
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: none;
+        }
+
+        .btn.blue { background: #e1e9ff; color: var(--nintendo-blue); }
+        .btn.disabled { opacity: 0.5; cursor: default; }
+
+        .back-btn {
+            position: absolute;
+            top: 10px;
+            left: 10px;
+            color: white;
+            text-decoration: none;
+            font-weight: bold;
+            font-size: 20px;
+            z-index: 100;
+        }
+
+        /* Custom Modal */
+        #custom-alert {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            border: 4px solid #333;
+            border-radius: 10px;
+            width: 200px;
+            padding: 15px;
+            text-align: center;
+            z-index: 200;
+            display: none;
+            box-shadow: 0 0 20px rgba(0,0,0,0.5);
+        }
+        #custom-alert button {
+            margin-top: 10px;
+            padding: 5px 15px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+
+    <a href="index.html" class="back-btn">⇠</a>
+
+    <!-- Hidden File Input -->
+    <input type="file" id="file-input" multiple webkitdirectory directory style="display: none;">
+
+    <div id="custom-alert">
+        <p id="alert-text">No Audio Files found!</p>
+        <button onclick="closeAlert()">OK</button>
+    </div>
+
+    <div class="console-container">
+        <!-- Top Screen -->
+        <div class="top-screen">
+            <div class="top-header">Nintendo 3DS Sound</div>
+            <div class="visualizer-area">
+                <canvas id="visualizer"></canvas>
+                <div class="bird-container">
+                    <div class="bird">🦜</div>
+                    <div class="bird">🦜</div>
+                </div>
+            </div>
+            <div class="top-status-bar">
+                <span>🔊</span>
+                <span>🔋 🔋</span>
+                <span id="top-clock">16:53</span>
+                <span id="time-display">0:00:00 / 0:00:00</span>
+            </div>
+        </div>
+
+        <!-- Bottom Screen -->
+        <div class="bottom-screen">
+            <div class="record-area">
+                <div class="record-disc" id="disc"></div>
+                <div class="drag-zone" id="drop-zone" onclick="triggerFileInput()">
+                    <span>Tap to Select Music Folder or Files</span>
+                </div>
+            </div>
+
+            <div class="player-controls">
+                <div class="track-info">
+                    <span id="play-state">▶</span>
+                    <span id="current-track-name">No track loaded</span>
+                </div>
+                
+                <div class="seek-bar-container">
+                    <span>◀</span>
+                    <input type="range" id="seek-bar" value="0" min="0" step="0.1">
+                    <span>▶</span>
+                </div>
+
+                <div class="button-grid">
+                    <div class="btn" onclick="prevTrack()">StreetPass</div>
+                    <div class="btn" id="play-pause-btn" onclick="handleOpenBtn()">Open</div>
+                    <div class="btn disabled">Add...</div>
+                    <div class="btn blue">Back</div>
+                    <div class="btn" onclick="nextTrack()">Next</div>
+                    <div class="btn">Settings</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let audioCtx;
+        let analyser;
+        let source;
+        let audio = new Audio();
+        let playlist = [];
+        let currentIndex = 0;
+        let isPlaying = false;
+
+        const dropZone = document.getElementById('drop-zone');
+        const fileInput = document.getElementById('file-input');
+        const visualizer = document.getElementById('visualizer');
+        const ctx = visualizer.getContext('2d');
+        const disc = document.getElementById('disc');
+        const playBtn = document.getElementById('play-pause-btn');
+        const trackNameDisplay = document.getElementById('current-track-name');
+        const timeDisplay = document.getElementById('time-display');
+        const seekBar = document.getElementById('seek-bar');
+        const customAlert = document.getElementById('custom-alert');
+
+        function resize() {
+            visualizer.width = visualizer.clientWidth;
+            visualizer.height = visualizer.clientHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        function triggerFileInput() {
+            fileInput.click();
+        }
+
+        function handleOpenBtn() {
+            if (playlist.length === 0) {
+                triggerFileInput();
+            } else {
+                togglePlay();
+            }
+        }
+
+        function showAlert(msg) {
+            document.getElementById('alert-text').textContent = msg;
+            customAlert.style.display = 'block';
+        }
+
+        function closeAlert() {
+            customAlert.style.display = 'none';
+        }
+
+        fileInput.addEventListener('change', (e) => {
+            const files = Array.from(e.target.files);
+            const audioFiles = files.filter(file => file.type.startsWith('audio/') || file.name.match(/\.(mp3|wav|ogg|m4a)$/i));
+
+            if (audioFiles.length === 0) {
+                showAlert("No Audio Files found!");
+                return;
+            }
+
+            playlist = audioFiles.map(file => ({
+                name: file.name,
+                url: URL.createObjectURL(file)
+            }));
+
+            dropZone.style.display = 'none';
+            currentIndex = 0;
+            loadTrack(currentIndex);
+            
+            // Auto-play after selection
+            if (!isPlaying) togglePlay();
+        });
+
+        function loadTrack(index) {
+            if (playlist.length === 0) return;
+            
+            audio.src = playlist[index].url;
+            trackNameDisplay.textContent = playlist[index].name;
+            audio.load();
+            
+            if (isPlaying) audio.play();
+            setupWebAudio();
+        }
+
+        function setupWebAudio() {
+            if (!audioCtx) {
+                audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                analyser = audioCtx.createAnalyser();
+                source = audioCtx.createMediaElementSource(audio);
+                source.connect(analyser);
+                analyser.connect(audioCtx.destination);
+                analyser.fftSize = 256;
+                drawVisualizer();
+            }
+        }
+
+        function togglePlay() {
+            if (playlist.length === 0) return;
+            
+            if (audio.paused) {
+                audio.play();
+                disc.classList.add('spinning');
+                playBtn.textContent = "Pause";
+                isPlaying = true;
+                if (audioCtx) audioCtx.resume();
+            } else {
+                audio.pause();
+                disc.classList.remove('spinning');
+                playBtn.textContent = "Play";
+                isPlaying = false;
+            }
+        }
+
+        function nextTrack() {
+            if (playlist.length === 0) return;
+            currentIndex = (currentIndex + 1) % playlist.length;
+            loadTrack(currentIndex);
+        }
+
+        function prevTrack() {
+            if (playlist.length === 0) return;
+            currentIndex = (currentIndex - 1 + playlist.length) % playlist.length;
+            loadTrack(currentIndex);
+        }
+
+        audio.addEventListener('timeupdate', () => {
+            const current = formatTime(audio.currentTime);
+            const total = formatTime(audio.duration || 0);
+            timeDisplay.textContent = `${current} / ${total}`;
+            seekBar.max = audio.duration || 0;
+            seekBar.value = audio.currentTime;
+        });
+
+        audio.addEventListener('ended', nextTrack);
+
+        seekBar.addEventListener('input', () => {
+            audio.currentTime = seekBar.value;
+        });
+
+        function formatTime(seconds) {
+            const h = Math.floor(seconds / 3600);
+            const m = Math.floor((seconds % 3600) / 60);
+            const s = Math.floor(seconds % 60);
+            return `${h}:${m.toString().padStart(2, '0')}:${s.toString().padStart(2, '0')}`;
+        }
+
+        function drawVisualizer() {
+            requestAnimationFrame(drawVisualizer);
+            const bufferLength = analyser.frequencyBinCount;
+            const dataArray = new Uint8Array(bufferLength);
+            analyser.getByteFrequencyData(dataArray);
+
+            ctx.clearRect(0, 0, visualizer.width, visualizer.height);
+            
+            ctx.beginPath();
+            ctx.strokeStyle = '#0066cc';
+            ctx.lineWidth = 3;
+
+            const sliceWidth = visualizer.width / bufferLength;
+            let x = 0;
+
+            for (let i = 0; i < bufferLength; i++) {
+                const v = dataArray[i] / 128.0;
+                const y = (v * visualizer.height / 4) + (visualizer.height / 2);
+
+                if (i === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+                x += sliceWidth;
+            }
+            ctx.stroke();
+        }
+
+        function updateClock() {
+            const now = new Date();
+            document.getElementById('top-clock').textContent = 
+                now.getHours().toString().padStart(2, '0') + ':' + 
+                now.getMinutes().toString().padStart(2, '0');
+        }
+        setInterval(updateClock, 1000);
+        updateClock();
+
+    </script>
+</body>
+</html>
