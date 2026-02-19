@@ -423,8 +423,9 @@
 
         function launchGame() {
             if (!currentGame) return;
+            // Updated to use the correct case-sensitive URL structure
             const slug = currentGame.toLowerCase().replace(/\s+/g, '');
-            window.location.href = `https://twobbular.github.io/3dsite/${slug}`;
+            window.location.href = `https://twobbular.github.io/3DSite/${slug}`;
         }
     </script>
 </body>
